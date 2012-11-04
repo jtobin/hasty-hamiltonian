@@ -1,0 +1,10 @@
+working
+*swp
+.git
+.DS_Store
+dist
+Setup.hs
+*trace*
+demos
+output
+
