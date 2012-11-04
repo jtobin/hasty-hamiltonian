@@ -41,6 +41,7 @@ leapfrog t0 r0 = do
                               rt = zipWith (+) rm (map (* (0.5*e)) (gTarget tt))
                           in  go tt rt (n - 1)
     return $! go t0 r0 ndisc 
+{-# INLINE leapfrog #-}
 
 -- | Perform a Metropolis accept/reject step.
 metropolisStep :: PrimMonad m 
@@ -64,18 +65,23 @@ metropolisStep state g = do
                     - target t0 - 0.5*(r <.> r)
 
     return $! MarkovChain (fst mc) (nacc + snd mc)
+{-# INLINE metropolisStep #-}
  
 -- | Diffuse through states.
 runChain :: Options         -- Options of the Markov chain.
          -> Int             -- Number of epochs to iterate the chain.
+         -> Int             -- Print every nth iteration.
          -> MarkovChain     -- Initial state of the Markov chain.
          -> Gen RealWorld   -- MWC PRNG
          -> IO MarkovChain  -- End state of the Markov chain, wrapped in IO.
-runChain params nepochs initConfig g 
-    | nepochs == 0 = return initConfig
-    | otherwise    = do
-        result <- runReaderT (metropolisStep initConfig g) params
-        print result
-        runChain params (nepochs - 1) result g
+runChain = go 
+  where go o n t !c g | n == 0 = return c
+                      | n `rem` t /= 0 = do
+                            r <- runReaderT (metropolisStep c g) o
+                            go o (n - 1) t r g
+                      | otherwise = do
+                            r <- runReaderT (metropolisStep c g) o
+                            print r
+                            go o (n - 1) t r g
+{-# INLINE runChain #-}
 
- 

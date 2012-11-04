@@ -15,26 +15,28 @@ gTarget = grad target
 main = do
     args  <- getArgs 
     when (args == []) $ do
-        putStrLn  "(hasty-hamiltonian) Rosenbrock density                       "
-        putStrLn  "Usage: ./Rosenbrock_HMC <numSteps> <nDisc> <stepSize> <inits>" 
-        putStrLn  "                                                             "
-        putStrLn  "numSteps         : Number of Markov chain iterations to run. "
-        putStrLn  "nDisc            : Number of discretizing steps to take.     "
-        putStrLn  "stepSize         : Perturbation scaling parameter.           "
-        putStrLn  "inits            : Filepath containing points at which to    "
-        putStrLn  "                   initialize the chain.                     "
+        putStrLn  "(hasty-hamiltonian) Rosenbrock density                                   "
+        putStrLn  "Usage: ./Rosenbrock_HMC <numSteps> <thinEvery> <nDisc> <stepSize> <inits>" 
+        putStrLn  "                                                                         "
+        putStrLn  "numSteps         : Number of Markov chain iterations to run.             "
+        putStrLn  "thinEvery        : Print every nth iteration.                            "
+        putStrLn  "nDisc            : Number of discretizing steps to take.                 "
+        putStrLn  "stepSize         : Perturbation scaling parameter.                       "
+        putStrLn  "inits            : Filepath containing points at which to                "
+        putStrLn  "                   initialize the chain.                                 "
         exitSuccess
 
     inits <- fmap (map read . words) (readFile (args !! 3)) :: IO [Double]
 
-    let nepochs = read (head args) :: Int
-        nDisc   = read (args !! 1) :: Double
-        eps     = read (args !! 2) :: Double
-        params  = Options target gTarget nDisc eps
-        config  = MarkovChain inits 0
+    let nepochs   = read (head args) :: Int
+        thinEvery = read (args !! 1) :: Int
+        nDisc     = read (args !! 2) :: Double
+        eps       = read (args !! 3) :: Double
+        params    = Options target gTarget nDisc eps
+        config    = MarkovChain inits 0
 
     g       <- create
-    results <- runChain params nepochs config g
+    results <- runChain params nepochs thinEvery config g
 
     hPutStrLn stderr $ 
         let nAcc  = accepts results
