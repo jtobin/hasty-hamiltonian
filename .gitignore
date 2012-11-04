@@ -1,10 +1,9 @@
-working
-*swp
 .git
+*swp
 .DS_Store
 dist
 Setup.hs
-*trace*
+*.hi
+*.o
 demos
-output
-
+data
