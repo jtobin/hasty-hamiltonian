@@ -7,6 +7,7 @@ import Control.Monad.Reader
 import Control.Monad.Primitive
 import System.Random.MWC
 import System.Random.MWC.Distributions
+import GHC.Float
 
 -- | State of the Markov chain.  Current parameter values are held in 'theta', 
 --   while accepts counts the number of proposals accepted.
@@ -25,7 +26,7 @@ type ViewsOptions = ReaderT Options
 
 -- | Display the current state. 
 instance Show MarkovChain where
-    show config = filter (`notElem` "[]") $ show (theta config)
+    show config = filter (`notElem` "[]") $ show (map double2Float (theta config))
 
 -- | The 'leapfrog' or Stormer-Verlet discretizer.
 leapfrog :: Monad m 

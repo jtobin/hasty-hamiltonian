@@ -1,23 +1,31 @@
+{-# LANGUAGE BangPatterns #-}
+
 import Numeric.MCMC.Hamiltonian
 import System.Random.MWC
 import System.Environment
 import System.Exit
 import System.IO
-import Numeric.AD
 import Control.Monad
+import Numeric.AD
 
 target :: RealFloat a => [a] -> a
-target [x0, x1] = (-1)*(5*(x1 - x0^2)^2 + 0.05*(1 - x0)^2)
+target xs = go 0 0 xs 
+  where go !t0 !t1 []         = (- t0 / (2*h)) - (0.5 * h * t1)
+        go !t0 !t1 (u:us:uss) = go (t0 + (us - u)^2) (t1 + v (us + u)) uss
+        h   = 1 / fromIntegral (length xs)
+        v x = (1 - x^2)^2
+{-# INLINE target #-}
 
 gTarget :: [Double] -> [Double]
 gTarget = grad target
+{-# INLINE gTarget #-}
 
 main = do
     args  <- getArgs 
     when (args == []) $ do
-        putStrLn  "(hasty-hamiltonian) Rosenbrock density                                   "
-        putStrLn  "Usage: ./Rosenbrock_HMC <numSteps> <thinEvery> <nDisc> <stepSize> <inits>" 
-        putStrLn  "                                                                         "
+        putStrLn  "(hasty-hamiltonian) Stochastic partial differential equation "
+        putStrLn  "Usage: ./SPDE_HMC <numSteps> <inits> <thinEvery>             " 
+        putStrLn  "                                                             "
         putStrLn  "numSteps         : Number of Markov chain iterations to run.             "
         putStrLn  "thinEvery        : Print every nth iteration.                            "
         putStrLn  "nDisc            : Number of discretizing steps to take.                 "
