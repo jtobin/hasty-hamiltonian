@@ -25,5 +25,5 @@ Source-repository head
 library
   exposed-modules:     Numeric.MCMC.Hamiltonian
   -- other-modules:       
-  build-depends:       base ==4.*, mtl ==2.1.*, primitive ==0.4.*, mwc-random ==0.12.*
+  build-depends:       base ==4.*, mtl ==2.1.*, primitive ==0.4.*, mwc-random ==0.12.*, parallel ==3.2.*
   ghc-options:         -Wall

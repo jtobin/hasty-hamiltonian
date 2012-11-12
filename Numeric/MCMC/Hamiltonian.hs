@@ -37,9 +37,9 @@ leapfrog t0 r0 = do
     Options _ gTarget ndisc e <- ask
     let go !t !r n 
             | n == 0    = (t, r)
-            | otherwise = let rm = zipWith (+) r  (map (* (0.5*e)) (gTarget t))
-                              tt = zipWith (+) t  (map (*e) rm)
-                              rt = zipWith (+) rm (map (* (0.5*e)) (gTarget tt))
+            | otherwise = let rm = zipWith (+) r  (map (* (0.5*e)) (gTarget t)) 
+                              tt = zipWith (+) t  (map (*e) rm) 
+                              rt = zipWith (+) rm (map (* (0.5*e)) (gTarget tt)) 
                           in  go tt rt (n - 1)
     return $! go t0 r0 ndisc 
 {-# INLINE leapfrog #-}
@@ -61,7 +61,7 @@ metropolisStep state g = do
              then (t,  1)
              else (t0, 0)
         
-        xs <.> ys = sum $ zipWith (*) xs ys
+        xs <.> ys = sum $ zipWith (*) xs ys 
         arRatio   =   target t  + 0.5*(r0 <.> r0)
                     - target t0 - 0.5*(r <.> r)
 

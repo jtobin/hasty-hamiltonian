@@ -7,3 +7,4 @@ Setup.hs
 *.o
 demos
 data
+benchmarks
