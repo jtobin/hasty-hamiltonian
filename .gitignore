@@ -13,3 +13,9 @@ build
 cabal-dev
 site
 benchmarks
+.cabal-sandbox
+cabal.sandbox.config
+tmp
+*hp
+*ps
+*aux
