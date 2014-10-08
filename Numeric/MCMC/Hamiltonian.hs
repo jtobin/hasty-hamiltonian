@@ -3,7 +3,13 @@
 -- | Hamiltonian Monte Carlo.  See, ex: Neal (2012)
 --   http://arxiv.org/pdf/1206.1901.pdf.
 
-module Numeric.MCMC.Hamiltonian where
+module Numeric.MCMC.Hamiltonian (
+    Target(..)
+  , Tunables(..)
+  , Options(..)
+  , hamiltonian
+  , hmc
+  ) where
 
 import Control.Applicative
 import Control.Monad
@@ -15,27 +21,31 @@ import qualified Data.Vector as V
 import System.Random.MWC
 import System.Random.MWC.Distributions
 
-type Parameters = Vector Double
 
+-- | The target we want to sample from.  Consists of a log target and its
+--   gradient.
 data Target = Target {
     lTarget  :: Parameters -> Double     -- ^ log target
   , glTarget :: Parameters -> Parameters -- ^ gradient of log target
   }
 
+type Parameters = Vector Double
+
 data Tunables = Tunables {
-    stepSize  :: !Double
-  , leapfrogs :: !Int
+    stepSize  :: !Double -- ^ step size for a given proposal
+  , leapfrogs :: !Int    -- ^ number of leapfrog steps to take
   } deriving Show
 
 data Options = Options {
-    epochs  :: !Int
-  , initial :: !Parameters
+    epochs  :: !Int        -- ^ number of epochs to iterate the chain
+  , initial :: !Parameters -- ^ start location
   } deriving Show
 
 type Particle = (Parameters, Parameters)
 
 type Transition m = StateT Parameters m Parameters
 
+-- | The Hamiltonian transition operator.
 hamiltonian
   :: PrimMonad m
   => Target
@@ -51,6 +61,7 @@ hamiltonian target tunables g = do
   put next
   return next
 
+-- | The leapfrog or Stormer-Verlet integrator.
 leapfrogIntegrator :: Target -> Tunables -> Particle -> Particle
 leapfrogIntegrator target tunables (q0, r0) = go q0 r0 l where
   l        = leapfrogs tunables
@@ -59,6 +70,7 @@ leapfrogIntegrator target tunables (q0, r0) = go q0 r0 l where
     let (q1, r1) = leapfrog target tunables (q, r)
     in  go q1 r1 (pred n)
 
+-- | A single iteration of the leapfrog integrator.
 leapfrog :: Target -> Tunables -> Particle -> Particle
 leapfrog target tunables (q, r) = (qf, rf) where
   rm = adjustMomentum target tunables (q, r)
@@ -80,14 +92,11 @@ adjustPosition tunables (r, q) = q .+ (e .* r) where
 (.*) :: Double -> Parameters -> Parameters
 z .* xs = (* z) <$> xs
 
--- | Scalar-vector subtraction.
-(.-) :: Parameters -> Parameters -> Parameters
-xs .- ys = V.zipWith (-) xs ys
-
 -- | Scalar-vector addition.
 (.+) :: Parameters -> Parameters -> Parameters
 xs .+ ys = V.zipWith (+) xs ys
 
+-- | The next state of the Markov chain.
 nextState
   :: Target
   -> Particle
@@ -105,13 +114,16 @@ auxilliaryTarget :: Target -> Particle -> Double
 auxilliaryTarget target (t, r) = f t - 0.5 * innerProduct r r where
   f = lTarget target
 
+-- | The acceptance probability of a move.
 acceptProb :: Target -> Particle -> Particle -> Double
 acceptProb target (q0, q1) (r0, r1) = exp . min 0 $
   auxilliaryTarget target (q1, r1) - auxilliaryTarget target (q0, r0)
 
+-- | Simple inner product.
 innerProduct :: Parameters -> Parameters -> Double
 innerProduct xs ys = V.sum $ V.zipWith (*) xs ys
 
+-- | Run a chain of HMC.
 hmc
   :: PrimMonad m
   => Target
