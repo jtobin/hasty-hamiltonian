@@ -1,5 +1,5 @@
 name:                hasty-hamiltonian
-version:             0.2.0.0
+version:             0.3.0.0
 synopsis:            Speedy traversal through parameter space.
 homepage:            http://jtobin.github.com/hasty-hamiltonian
 license:             BSD3
@@ -8,7 +8,7 @@ author:              Jared Tobin
 maintainer:          jared@jtobin.ca
 category:            Numeric
 build-type:          Simple
-cabal-version:       >=1.10
+cabal-version:       >=1.18
 Description:
 
     Speedy gradient-based traversal through parameter space.
@@ -20,14 +20,15 @@ Source-repository head
 library
   default-language: Haskell2010
   exposed-modules:
-    Numeric.MCMC.Hamiltonian
+    Numeric.Sampling.Hamiltonian
   build-depends:
-      base         >= 4.7.0.1 && < 5
-    , mtl          >= 2.2.1
-    , mwc-random   >= 0.13.2.0
-    , primitive    >= 0.5.3.0
-    , transformers >= 0.4.1.0
-    , vector       >= 0.10.11.0
+      base
+    , mtl
+    , mcmc-types
+    , mwc-random
+    , primitive
+    , transformers
+    , vector
   ghc-options:
     -Wall
 
@@ -39,9 +40,9 @@ Test-Suite hasty-examples
   ghc-options:
     -threaded -rtsopts -Wall -O2
   build-depends:
-      ad                >= 4.2.1
-    , base              >= 4.7.0.1 && < 5
-    , hasty-hamiltonian >= 0.2.0.0
+      ad
+    , base
+    , hasty-hamiltonian
     , mwc-random        >= 0.13.2.0
-    , vector            >= 0.10.11.0
+    , vector
 

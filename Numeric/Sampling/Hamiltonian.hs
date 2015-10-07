@@ -3,7 +3,7 @@
 -- | Hamiltonian Monte Carlo.  See, ex: Neal (2012)
 --   http://arxiv.org/pdf/1206.1901.pdf.
 
-module Numeric.MCMC.Hamiltonian (
+module Numeric.Sampling.Hamiltonian (
     Target(..)
   , Tunables(..)
   , Options(..)
@@ -16,20 +16,12 @@ import Control.Monad
 import Control.Monad.Primitive
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State.Strict
+import qualified Data.Foldable as Foldable
+import Data.Sampling.Types
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import System.Random.MWC
 import System.Random.MWC.Distributions
-
-
--- | The target we want to sample from.  Consists of a log target and its
---   gradient.
-data Target = Target {
-    lTarget  :: Parameters -> Double     -- ^ log target
-  , glTarget :: Parameters -> Parameters -- ^ gradient of log target
-  }
-
-type Parameters = Vector Double
 
 data Tunables = Tunables {
     stepSize  :: !Double -- ^ step size for a given proposal
@@ -60,6 +52,7 @@ hamiltonian target tunables g = do
       next   = nextState target (q0, q) (r0, r) zc
   put next
   return next
+{-# INLINE hamiltonian #-}
 
 -- | The leapfrog or Stormer-Verlet integrator.
 leapfrogIntegrator :: Target -> Tunables -> Particle -> Particle
@@ -69,6 +62,7 @@ leapfrogIntegrator target tunables (q0, r0) = go q0 r0 l where
   go q r n =
     let (q1, r1) = leapfrog target tunables (q, r)
     in  go q1 r1 (pred n)
+{-# INLINE leapfrogIntegrator #-}
 
 -- | A single iteration of the leapfrog integrator.
 leapfrog :: Target -> Tunables -> Particle -> Particle
@@ -76,25 +70,30 @@ leapfrog target tunables (q, r) = (qf, rf) where
   rm = adjustMomentum target tunables (q, r)
   qf = adjustPosition tunables (rm, q)
   rf = adjustMomentum target tunables (qf, rm)
+{-# INLINE leapfrog #-}
 
 -- | Adjust momentum according to a half-leapfrog step.
 adjustMomentum :: Target -> Tunables -> Particle -> Parameters
 adjustMomentum target tunables (q, r) = r .+ ((0.5 * e) .* g q) where
   e = stepSize tunables
   g = glTarget target
+{-# INLINE adjustMomentum #-}
 
 -- | Adjust position according to a half-leapfrog step.
 adjustPosition :: Tunables -> Particle -> Parameters
 adjustPosition tunables (r, q) = q .+ (e .* r) where
   e = stepSize tunables
+{-# INLINE adjustPosition #-}
 
 -- | Scalar-vector multiplication.
 (.*) :: Double -> Parameters -> Parameters
 z .* xs = (* z) <$> xs
+{-# INLINE (.*) #-}
 
 -- | Scalar-vector addition.
 (.+) :: Parameters -> Parameters -> Parameters
 xs .+ ys = V.zipWith (+) xs ys
+{-# INLINE (.+) #-}
 
 -- | The next state of the Markov chain.
 nextState
@@ -108,20 +107,24 @@ nextState target position momentum z
     | otherwise   = fst position
   where
     pAccept = acceptProb target position momentum
+{-# INLINE nextState #-}
 
 -- | A target augmented by momentum auxilliary variables.
 auxilliaryTarget :: Target -> Particle -> Double
 auxilliaryTarget target (t, r) = f t - 0.5 * innerProduct r r where
   f = lTarget target
+{-# INLINE auxilliaryTarget #-}
 
 -- | The acceptance probability of a move.
 acceptProb :: Target -> Particle -> Particle -> Double
 acceptProb target (q0, q1) (r0, r1) = exp . min 0 $
   auxilliaryTarget target (q1, r1) - auxilliaryTarget target (q0, r0)
+{-# INLINE acceptProb #-}
 
 -- | Simple inner product.
 innerProduct :: Parameters -> Parameters -> Double
 innerProduct xs ys = V.sum $ V.zipWith (*) xs ys
+{-# INLINE innerProduct #-}
 
 -- | Run a chain of HMC.
 hmc
@@ -136,4 +139,5 @@ hmc target tunables options g = do
       n = epochs options
       q = initial options
   evalStateT (replicateM n h) q
+{-# INLINE hmc #-}
 

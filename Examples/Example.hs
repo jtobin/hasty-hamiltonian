@@ -17,7 +17,7 @@ rosenbrock :: Target
 rosenbrock = Target lRosenbrock glRosenbrock
 
 tunables :: Tunables
-tunables = Tunables 0.05 20
+tunables = Tunables 0.001 50
 
 options :: Options
 options = Options 5000 (fromList [1, 1])
