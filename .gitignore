@@ -2,7 +2,6 @@
 *swp
 .DS_Store
 dist
-Setup.hs
 *.hi
 *.o
 demos
