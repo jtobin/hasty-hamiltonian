@@ -27,5 +27,5 @@ differentiation.
     main :: IO ()
     main = withSystemRandom . asGenIO $ mcmc 10000 0.05 20 [0, 0] booth
 
-![trace](https://dl.dropboxusercontent.com/spa/u0s6617yxinm2ca/osecfv_w.png)
+![trace](https://dl.dropboxusercontent.com/spa/u0s6617yxinm2ca/h6ty39dl.png)
 
