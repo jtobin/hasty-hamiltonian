@@ -19,3 +19,8 @@ tmp
 *hp
 *ps
 *aux
+.stack-work
+debug
+test/Beale
+test/Booth
+test/Rosenbrock
