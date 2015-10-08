@@ -1,5 +1,5 @@
 name:                hasty-hamiltonian
-version:             1.1.0
+version:             1.1.1
 synopsis:            Speedy traversal through parameter space.
 homepage:            http://jtobin.github.com/hasty-hamiltonian
 license:             MIT
@@ -50,7 +50,6 @@ library
     Numeric.MCMC.Hamiltonian
   build-depends:
       base             <  5
-    , ghc-prim
     , mcmc-types       >= 1.0.1
     , mwc-probability  >= 1.0.1
     , lens
