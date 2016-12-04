@@ -1,3 +1,6 @@
-- 1.1.1
-    * Redesign to match the mcmc-types API.
+# Changelog
+
+- 1.1.5 (2016-12-04)
+		* Simplify some constraints and add missing dependency bounds.
+
 

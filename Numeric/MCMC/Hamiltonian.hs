@@ -153,7 +153,7 @@ gzipWith f xs ys = imap (\j x -> f x (fromMaybe err (ys ^? ix j))) xs where
 
 -- The leapfrog or Stormer-Verlet integrator.
 leapfrogIntegrator
-  :: (Num (IxValue (f Double)), Num (IxValue (t Double))
+  :: (Num (IxValue (f Double))
      , FunctorWithIndex (Index (f Double)) t
      , FunctorWithIndex (Index (t Double)) f
      , Ixed (f Double), Ixed (t Double)
@@ -171,7 +171,7 @@ leapfrogIntegrator target e l (q0, r0) = go q0 r0 l where
 
 -- A single leapfrog step.
 leapfrog
-  :: (Num (IxValue (f Double)), Num (IxValue (t Double))
+  :: (Num (IxValue (f Double))
      , FunctorWithIndex (Index (f Double)) t
      , FunctorWithIndex (Index (t Double)) f
      , Ixed (t Double), Ixed (f Double)
