@@ -35,8 +35,9 @@ module Numeric.MCMC.Hamiltonian (
   ) where
 
 import Control.Lens hiding (index)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Primitive (PrimState, PrimMonad)
 import Control.Monad.Trans.State.Strict hiding (state)
-import Control.Monad.Primitive (PrimState, PrimMonad, RealWorld)
 import qualified Data.Foldable as Foldable (sum)
 import Data.Maybe (fromMaybe)
 import Data.Sampling.Types
@@ -50,7 +51,8 @@ import qualified System.Random.MWC.Probability as MWC
 --
 -- >>> withSystemRandom . asGenIO $ mcmc 3 1 [0, 0] target
 mcmc
-  :: (Num (IxValue (t Double)), Show (t Double), Traversable t
+  :: ( MonadIO m, PrimMonad m
+     , Num (IxValue (t Double)), Show (t Double), Traversable t
      , FunctorWithIndex (Index (t Double)) t, Ixed (t Double)
      , IxValue (t Double) ~ Double)
   => Int
@@ -58,12 +60,12 @@ mcmc
   -> Int
   -> t Double
   -> Target (t Double)
-  -> Gen RealWorld
-  -> IO ()
+  -> Gen (PrimState m)
+  -> m ()
 mcmc n step leaps chainPosition chainTarget gen = runEffect $
         chain step leaps Chain {..} gen
     >-> Pipes.take n
-    >-> Pipes.mapM_ print
+    >-> Pipes.mapM_ (liftIO . print)
   where
     chainScore    = lTarget chainTarget chainPosition
     chainTunables = Nothing
