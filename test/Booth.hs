@@ -13,5 +13,7 @@ booth :: Target [Double]
 booth = Target target (Just gTarget)
 
 main :: IO ()
-main = withSystemRandom . asGenIO $ mcmc 100 0.05 20 [0, 0] booth
+main = withSystemRandom . asGenIO $ \gen -> do
+  _ <- chain 100 0.05 20 [0, 0] booth gen
+  mcmc 100 0.05 20 [0, 0] booth gen
 

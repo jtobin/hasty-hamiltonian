@@ -7,8 +7,9 @@
 
 Speedy, gradient-based traversal through parameter space.
 
-Exports a `mcmc` function that prints a trace to stdout, as well as a
-`hamiltonian` transition operator that can be used more generally.
+Exports a `mcmc` function that prints a trace to stdout, a `chain` function for
+collecting results in memory, and a `hamiltonian` transition operator that can
+be used more generally.
 
 If you don't want to calculate your gradients by hand you can use the handy
 [ad](https://hackage.haskell.org/package/ad) library for automatic

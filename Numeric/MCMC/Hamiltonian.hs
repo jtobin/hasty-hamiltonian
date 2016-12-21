@@ -24,6 +24,7 @@
 
 module Numeric.MCMC.Hamiltonian (
     mcmc
+  , chain
   , hamiltonian
 
   -- * Re-exported
@@ -35,6 +36,8 @@ module Numeric.MCMC.Hamiltonian (
   ) where
 
 import Control.Lens hiding (index)
+import Control.Monad (replicateM)
+import Control.Monad.Codensity (lowerCodensity)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Primitive (PrimState, PrimMonad)
 import Control.Monad.Trans.State.Strict hiding (state)
@@ -49,7 +52,7 @@ import qualified System.Random.MWC.Probability as MWC
 
 -- | Trace 'n' iterations of a Markov chain and stream them to stdout.
 --
--- >>> withSystemRandom . asGenIO $ mcmc 3 1 [0, 0] target
+-- >>> withSystemRandom . asGenIO $ mcmc 10000 0.05 20 [0, 0] target
 mcmc
   :: ( MonadIO m, PrimMonad m
      , Num (IxValue (t Double)), Show (t Double), Traversable t
@@ -63,15 +66,44 @@ mcmc
   -> Gen (PrimState m)
   -> m ()
 mcmc n step leaps chainPosition chainTarget gen = runEffect $
-        chain step leaps Chain {..} gen
+        drive step leaps Chain {..} gen
     >-> Pipes.take n
     >-> Pipes.mapM_ (liftIO . print)
   where
     chainScore    = lTarget chainTarget chainPosition
     chainTunables = Nothing
 
--- A Markov chain driven by the Metropolis transition operator.
+-- | Trace 'n' iterations of a Markov chain and collect the results in a list.
+--
+-- >>> results <- withSystemRandom . asGenIO $ chain 1000 0.05 20 [0, 0] target
 chain
+  :: (PrimMonad m, Traversable f
+     , FunctorWithIndex (Index (f Double)) f, Ixed (f Double)
+     , IxValue (f Double) ~ Double)
+  => Int
+  -> Double
+  -> Int
+  -> f Double
+  -> Target (f Double)
+  -> Gen (PrimState m)
+  -> m [Chain (f Double) b]
+chain n step leaps position target gen = runEffect $
+        drive step leaps origin gen
+    >-> collect n
+  where
+    origin = Chain {
+        chainScore    = lTarget target position
+      , chainTunables = Nothing
+      , chainTarget   = target
+      , chainPosition = position
+      }
+
+    collect :: Monad m => Int -> Consumer a m [a]
+    collect size = lowerCodensity $
+      replicateM size (lift Pipes.await)
+
+-- Drive a Markov chain.
+drive
   :: (Num (IxValue (t Double)), Traversable t
      , FunctorWithIndex (Index (t Double)) t, Ixed (t Double)
      , PrimMonad m, IxValue (t Double) ~ Double)
@@ -79,8 +111,8 @@ chain
   -> Int
   -> Chain (t Double) b
   -> Gen (PrimState m)
-  -> Producer (Chain (t Double) b) m ()
-chain step leaps = loop where
+  -> Producer (Chain (t Double) b) m c
+drive step leaps = loop where
   loop state prng = do
     next <- lift (MWC.sample (execStateT (hamiltonian step leaps) state) prng)
     yield next
