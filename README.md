@@ -32,3 +32,7 @@ differentiation.
 
 ![trace](https://dl.dropboxusercontent.com/spa/u0s6617yxinm2ca/h6ty39dl.png)
 
+*hasty-hamiltonian* is a member of the [declarative][decl] suit of libraries,
+containing a bunch of MCMC algorithms that play nicely together.
+
+[decl]: https://github.com/jtobin/declarative
