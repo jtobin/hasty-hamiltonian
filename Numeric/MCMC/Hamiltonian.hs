@@ -126,7 +126,7 @@ hamiltonian
   => Double -> Int -> Transition m (Chain (t Double) b)
 hamiltonian e l = do
   Chain {..} <- get
-  r0 <- lift (for chainPosition (const MWC.standard))
+  r0 <- lift (for chainPosition (const MWC.standardNormal))
   zc <- lift (MWC.uniform :: PrimMonad m => Prob m Double)
   let (q, r) = leapfrogIntegrator chainTarget e l (chainPosition, r0)
       perturbed      = nextState chainTarget (chainPosition, q) (r0, r) zc
