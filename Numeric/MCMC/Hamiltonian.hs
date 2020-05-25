@@ -38,7 +38,6 @@ module Numeric.MCMC.Hamiltonian (
 import Control.Lens hiding (index)
 import Control.Monad (replicateM)
 import Control.Monad.Codensity (lowerCodensity)
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Primitive (PrimState, PrimMonad)
 import Control.Monad.Trans.State.Strict hiding (state)
 import qualified Data.Foldable as Foldable (sum)
