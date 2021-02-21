@@ -1,5 +1,8 @@
 # Changelog
 
+- 1.3.4 (2021-02-21)
+    * Bump lens dependency to 5.0.0.
+
 - 1.3.3 (2020-05-25)
     * Remove a warning-throwing import made redundant in newer GHCs.
 
