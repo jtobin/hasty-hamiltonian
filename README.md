@@ -1,10 +1,5 @@
 # hasty-hamiltonian
 
-[![Build Status](https://secure.travis-ci.org/jtobin/hasty-hamiltonian.png)](http://travis-ci.org/jtobin/hasty-hamiltonian)
-[![Hackage Version](https://img.shields.io/hackage/v/hasty-hamiltonian.svg)](http://hackage.haskell.org/package/hasty-hamiltonian)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jtobin/hasty-hamiltonian/blob/master/LICENSE)
-
-
 Speedy, gradient-based traversal through parameter space.
 
 Exports a `mcmc` function that prints a trace to stdout, a `chain` function for
